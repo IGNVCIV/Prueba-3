@@ -1,0 +1,111 @@
+#Prueba Parcial 3 [Javiera Aguilar]
+import csv
+#0. Funciones de Validación
+
+def DígitoVerificador(Rut:str): #Se que me equivoqué pero te encontrare fallo desgraciado
+    from itertools import cycle 
+    Reordenar=map(int,(reversed,(str(Rut))))
+    Factor = cycle(range(2, 8))
+    s = sum(d * f for d, f in zip (Reordenar,Factor))
+    Verificador = (-s) % 11
+    if Verificador == 10:
+        return 'k'
+    elif Verificador == 11:
+        return 0
+    else:
+        return Verificador
+    
+def ValidarFormatoRut (Rut:str) -> bool:
+    Rut = Rut.lower()
+    if len (Rut) < 3 or "-" not in Rut:
+        return False
+    Número,Dígito = Rut.rsplit("-",1)
+    Número = Número.replace(".","")
+    if not Número.isnumeric() or len(Número) < 7 or len(Número) > 8:
+        return False
+    return Dígito == DígitoVerificador(Número)
+
+def RegistroEstudiante():
+    print("""[Registro de Estudiante]
+        \r Ingrese los datos solicitados en los formatos correctos.""")
+    try:
+        #Rut
+        Rut = input("Ingrese el Rut del Estudiante(11.111.111-k): ") #Funciones hechas, se me olvido algo porque en mi casa lo hice en inglés :(
+        assert ValidarFormatoRut(Rut), "Formato ingresado de manera incorrecta."
+        #Nombre
+        Nombre = input("Ingrese el nombre del Estudiante: ").capitalize()
+        assert Nombre.isalpha(), "Ingreso caracteres númericos."
+        Nota1= input("Ingrese la Calificación N°1 (Ejemplo: 70): ")
+        assert Nota1.isnumeric(), "No ingreso un valor númerico"
+        Nota2= input("Ingrese la Calificación N°2 (Ejemplo: 70): ")
+        assert Nota2.isnumeric(), "No ingreso un valor númerico"
+        Nota3= input("Ingrese la Calificación N°3 (Ejemplo: 70): ")
+        assert Nota3.isnumeric(), "No ingreso un valor númerico"
+        Nota4= input("Ingrese la Calificación N°4 (Ejemplo: 70): ")
+        assert Nota4.isnumeric(), "No ingreso un valor númerico"
+        print("Registro Completado")
+        return (Rut,Nombre,Nota1,Nota2,Nota3,Nota4)
+    except AssertionError as e:
+       print(f"\n Ha ocurrido un ERROR: {e} \n Vuelva a intentarlo.")
+    return None
+#2.	Visualización de Todos los Estudiantes
+def ListaEstudiantes(lista_estudiantes:list)->None:
+    if len(lista_estudiantes) > 0:
+        Campos=("N°","RUT","Nombre","Nota N°1","Nota N°2","Nota N°3","Nota N°4")#0,1.2.3.4.5.6 lista cifra, borra despues
+        print(f"\n{Campos[0].center(20)}{Campos[1].center(20)}{Campos[2].center(20)}{Campos[3].center(20)}{Campos[4].center(20)}{Campos[5].center(20)}{Campos[6].center(20)}")
+        k=1
+        for i in lista_estudiantes:
+            print(f"{str(k).center(3)}",end="")
+            for j in i:
+                print(f"{j.center(20)}",end="")
+            print()
+            k += 1
+    else:
+        print("No has registrado estudiantes nuevos.")
+
+#3.	Buscar Estudiante Por RUT
+#4.	Exportación a CSV
+def ExportarEstudiantes(ListaEstudiantes:list)->None:
+    if len(ListaEstudiantes) > 0:
+        from os import listdir #Era eso o no? 
+        if "RespaldoRegistro.cvs" not in listdir():
+            with open("RespaldoRegistro.cvs","a",newline="") as archivo_cvs:
+                archivo_cvs.write("N°","Rut","Nombre","Nota 1","Nota 2","Nota 3","Nota 4")
+    
+        with open("RespaldoRegistro.cvs","a",newline="") as archivo_cvs: 
+            for i in range(len(ListaEstudiantes)):ListaEstudiantes[i] = ",".join(ListaEstudiantes[i])
+            archivo_cvs.write(ListaEstudiantes[i]+"\n")
+            print("[Registro de Estudiantes respaldado en \"RespaldoRegistro.cvs\"]")
+            del ListaEstudiantes[:]
+    else:
+        print("No hay Registro para respaldar.")
+
+
+#Menú #Revisar porque no toma
+Estudiantes = list()
+EstudiantesActualizados = list()
+while True:
+    try:
+        print("""[Sistema de Calificaciones de Estudiantes]
+            \r 1. Registro de Estudiante 
+            \r 2. Visualización de Todos los Estudiantes
+            \r 3. Buscar Estudiante Por RUT
+            \r 4. Exportación a CSV notas de Estudiantes
+            \r 5. Salir del Programa""")
+        opción = input("\n ->Ingrese la opción que desee seleccionar:  ")
+        assert opción in ("1","2","3","4","5"), "Opción Invalida"
+        if opción == "1":
+            EstudianteNuevo = RegistroEstudiante()
+            if EstudianteNuevo is not None:
+                Estudiantes.append(EstudianteNuevo)
+        elif opción == "2":
+            ListaEstudiantes(EstudiantesActualizados)
+        elif opción == "3":
+            print("No se me ocurre como hacerlo en este momento :)")
+        elif opción == "4":
+            ExportarEstudiantes(Estudiantes)
+        elif opción == "5":
+            print("Saliendo del Programa. . .")
+            break
+    except AssertionError as e:
+        print(f"\n Ha ocurrido un ERROR: {e} \n Vuelva a intentarlo...")
